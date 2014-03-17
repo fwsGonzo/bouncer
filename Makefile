@@ -7,7 +7,7 @@
 # debugging: -g -Og
 BUILDOPT = -ggdb3 -Og
 # output file
-OUTPUT   = ./bin/bouncer
+OUTPUT   = ./bouncer
 
 ## code folder
 SOURCE = src src/math
