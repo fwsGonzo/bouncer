@@ -29,6 +29,10 @@
       <File Name="src/math/vec4.cpp"/>
       <File Name="src/math/vector.cpp"/>
     </VirtualDirectory>
+    <File Name="src/particle.cpp"/>
+    <File Name="src/canvas.cpp"/>
+    <File Name="src/canvas.hpp"/>
+    <File Name="src/particle.hpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="misc">
     <File Name="Makefile"/>
