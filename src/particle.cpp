@@ -5,11 +5,10 @@
 using namespace library;
 
 static const int TAILSIZE  = 4;
-static const int PARTICLE_SIZE_MIN = 10;
+static const int PARTICLE_SIZE_MIN = 16;
 static const int PARTICLE_SIZE_MAX = 32;
 
-static const float GRAVITY = 8.0;
-static const float GRAVITY_CURVE = 2.0;
+static const float GRAVITY = 1.0;
 
 Particle::Particle(int w, int h)
 {
@@ -42,6 +41,7 @@ void Particle::translate(std::vector<Particle*>& particles, vec2& bounds)
 {
 	float rad1 = getSize() / 2.0;
 	
+	/// determine gravity, and un-stuck ///
 	for (Particle* p : particles)
 	{
 		// avoid applying physics from itself
@@ -50,29 +50,43 @@ void Particle::translate(std::vector<Particle*>& particles, vec2& bounds)
 		// get distance (and direction) from particle A to B
 		vec2  delta = p->getPosition(0) - getPosition(0);
 		float dist  = delta.length();
-		float rad2  = p->getSize() / 2;
+		float rad2  = p->getSize() / 2.0;
 		
 		if (dist > rad1 + rad2)
 		{
 			// fast normalize
 			delta /= dist;
 			// apply gravity
-			this->direction += delta * GRAVITY / powf(dist, GRAVITY_CURVE);
-		}
-		else if (dist < 0.1)
-		{
-			// minimum translation distance
-			vec2 mtd = delta * (rad1 + rad2);
-			
-			// push apart
-			getPosition(0) += mtd * 0.5;
-			p->getPosition(0) += mtd * 0.5;
+			this->direction += delta * GRAVITY * (rad1 + rad2) / (dist * dist);
 		}
 		else
 		{
 			// minimum translation distance
-			float mtd = (rad1 + rad2 - dist) / dist;
+			float mtd = (rad1 + rad2 - dist) * 0.5;
 			
+			// get new normalized direction
+			delta /= dist;
+			
+			// simplest un-stuck
+			getPosition(0) -= delta * mtd;
+		}
+	}
+	
+	vec2 pos = getPosition(0) + direction;
+	
+	/// collisions & mass ///
+	for (Particle* p : particles)
+	{
+		// avoid applying physics from itself
+		if (p == this) continue;
+		
+		// get distance (and direction) from particle A to B
+		vec2  delta = p->getPosition(0) - pos;
+		float dist  = delta.length();
+		float rad2  = p->getSize() / 2;
+		
+		if (dist <= rad1 + rad2)
+		{
 			// get new normalized direction
 			delta /= dist;
 			
@@ -83,16 +97,13 @@ void Particle::translate(std::vector<Particle*>& particles, vec2& bounds)
 			vec2 pa = (bci - aci) * delta;
 			vec2 pb = (aci - bci) * delta;
 			
-			// un-stuck from particle
-			getPosition(0) += mtd * pa;
-			p->getPosition(0) += mtd * pb;
 			// accelerate apart
 			direction += pa;
 			p->direction += pb;
 		}
 	}
 	
-	vec2 pos = getPosition(0) + direction;
+	pos = getPosition(0) + direction;
 	
 	// negate directions if outside of the boundries
 	if (pos.x < rad1 || pos.x + rad1 > bounds.x)
@@ -122,9 +133,9 @@ void Particle::translate(std::vector<Particle*>& particles, vec2& bounds)
 		getPosition(i).mix(getPosition(0), 0.2 + 0.3 * (1.0 - (float)i / TS));
 }
 
-Fl_Color Particle::getColor(int tail)
+Fl_Color Particle::getColor(int index)
 {
-	float age = 1.0 - tail / (float) TAILSIZE;
+	float age = 1.0 - index / (float) tail.size();
 	
 	int r = this->r * age;
 	int g = this->g * age;

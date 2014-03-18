@@ -28,7 +28,7 @@ struct Particle
 	{
 		return tail[t];
 	}
-	Fl_Color getColor(int tail);
+	Fl_Color getColor(int tailIndex);
 	
 private:
 	// first element in tail is the main ball

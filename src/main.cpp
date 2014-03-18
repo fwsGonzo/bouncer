@@ -3,10 +3,10 @@
 #include <time.h>
 
 static const int FPS = 60;
-static const int PARTICLES = 80;
+static const int PARTICLES = 150;
 
-static const int WINDOW_W  = 640;
-static const int WINDOW_H  = 480;
+static const int WINDOW_W  = 800;
+static const int WINDOW_H  = 600;
 
 #include "canvas.hpp"
 
